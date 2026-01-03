@@ -42,8 +42,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                             error
                                 ? 'border-red-500 focus:ring-red-500'
                                 : 'border-gray-200 dark:border-gray-700',
-                            leftIcon && 'pl-10',
-                            rightIcon && 'pr-10',
+                            leftIcon ? 'pl-10' : '',
+                            rightIcon ? 'pr-10' : '',
                             label && 'pt-6',
                             className
                         )}
@@ -57,7 +57,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                         <label
                             className={cn(
                                 'absolute left-4 top-2 text-xs font-medium pointer-events-none transition-colors duration-200',
-                                leftIcon && 'left-10',
+                                leftIcon ? 'left-10' : '',
                                 isFocused
                                     ? 'text-primary-600 dark:text-primary-400'
                                     : 'text-gray-600 dark:text-gray-400'

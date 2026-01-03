@@ -1,6 +1,6 @@
 import React from 'react';
 import type { QuizQuestion } from '../../types';
-import { Image, FileCode } from 'lucide-react';
+import { FileCode } from 'lucide-react';
 
 interface QuestionDisplayProps {
     question: QuizQuestion;

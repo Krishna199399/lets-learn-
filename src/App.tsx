@@ -22,8 +22,6 @@ import ProductsList from './pages/shop/ProductsList';
 import Cart from './pages/shop/Cart';
 import VideoPlayer from './pages/video/VideoPlayer';
 import NotesLibrary from './pages/notes/NotesLibrary';
-import StudentDashboard from './pages/dashboard/StudentDashboard';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import CourseEditor from './pages/admin/CourseEditor';
 import ProductEditor from './pages/admin/ProductEditor';
 import NotificationEditor from './pages/admin/NotificationEditor';

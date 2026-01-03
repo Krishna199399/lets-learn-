@@ -26,15 +26,14 @@ const ProductDetails: React.FC = () => {
         setTimeout(() => {
             setProduct({
                 id: id || '1',
-                title: 'Complete Programming Books Bundle',
+                name: 'Complete Programming Books Bundle',
                 description: 'Master programming with this comprehensive bundle featuring books on JavaScript, Python, React, and more.',
                 price: 2999,
                 originalPrice: 4999,
-                image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=800',
+                images: ['https://images.unsplash.com/photo-1532012197267-da84d127e765?w=800'],
                 category: 'Books',
                 rating: 4.8,
-                reviews: 342,
-                inStock: true,
+                reviews: [],
                 stock: 25,
             });
             setLoading(false);
@@ -43,13 +42,7 @@ const ProductDetails: React.FC = () => {
 
     const handleAddToCart = () => {
         if (product) {
-            addItem({
-                id: product.id,
-                title: product.title,
-                price: product.price,
-                image: product.image,
-                quantity: quantity,
-            });
+            addItem(product, quantity);
             addToast({ type: 'success', message: `Added ${quantity} item(s) to cart!` });
         }
     };
@@ -89,7 +82,7 @@ const ProductDetails: React.FC = () => {
         );
     }
 
-    const images = [product.image, product.image, product.image];
+    const images = product.images.length > 0 ? product.images : [product.images[0], product.images[0], product.images[0]];
     const discount = product.originalPrice
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
@@ -108,7 +101,7 @@ const ProductDetails: React.FC = () => {
                             <motion.img
                                 key={selectedImage}
                                 src={images[selectedImage]}
-                                alt={product.title}
+                                alt={product.name}
                                 className="w-full h-96 object-cover rounded-xl"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -141,7 +134,7 @@ const ProductDetails: React.FC = () => {
                             )}
                         </div>
 
-                        <h1 className="text-4xl font-bold mb-4">{product.title}</h1>
+                        <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
 
                         <div className="flex items-center gap-4 mb-6">
                             <div className="flex items-center gap-1">
@@ -156,7 +149,7 @@ const ProductDetails: React.FC = () => {
                                 ))}
                                 <span className="ml-2 font-semibold">{product.rating}</span>
                             </div>
-                            <span className="text-gray-500">({product.reviews} reviews)</span>
+                            <span className="text-gray-500">({product.reviews.length} reviews)</span>
                         </div>
 
                         <div className="mb-6">
@@ -171,7 +164,7 @@ const ProductDetails: React.FC = () => {
                                 )}
                             </div>
                             <p className="text-green-600 font-semibold">
-                                {product.inStock ? `In Stock (${product.stock} available)` : 'Out of Stock'}
+                                {product.stock > 0 ? `In Stock (${product.stock} available)` : 'Out of Stock'}
                             </p>
                         </div>
 
@@ -211,7 +204,7 @@ const ProductDetails: React.FC = () => {
                                 className="flex-1"
                                 onClick={handleBuyNow}
                                 leftIcon={<ShoppingCart className="w-5 h-5" />}
-                                disabled={!product.inStock}
+                                disabled={product.stock === 0}
                             >
                                 Buy Now
                             </Button>
@@ -220,7 +213,7 @@ const ProductDetails: React.FC = () => {
                                 size="lg"
                                 className="flex-1"
                                 onClick={handleAddToCart}
-                                disabled={!product.inStock}
+                                disabled={product.stock === 0}
                             >
                                 Add to Cart
                             </Button>

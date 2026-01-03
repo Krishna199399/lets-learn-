@@ -1,6 +1,5 @@
 import React from 'react';
-import { Edit, Trash2, Eye, MoreVertical } from 'lucide-react';
-import Button from '../ui/Button';
+import { Edit, Trash2, Eye } from 'lucide-react';
 
 interface Column {
     key: string;

@@ -49,6 +49,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             lg: 'px-7 py-3.5 text-lg rounded-2xl',
         };
 
+        const { onDrag, onDragStart, onDragEnd, onAnimationStart, onAnimationEnd, ...restProps } = props;
+        
         return (
             <motion.button
                 ref={ref}
@@ -56,7 +58,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
                 disabled={disabled || isLoading}
                 whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
                 whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
-                {...props}
+                {...restProps}
             >
                 {isLoading ? (
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />

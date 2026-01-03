@@ -90,7 +90,7 @@ const PaymentPage: React.FC = () => {
                         size="lg"
                         className="w-full"
                         onClick={handlePayment}
-                        loading={processing}
+                        isLoading={processing}
                         rightIcon={!processing ? <ArrowRight className="w-5 h-5" /> : undefined}
                     >
                         {processing ? 'Processing Payment...' : 'Pay Now'}
