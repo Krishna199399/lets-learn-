@@ -30,7 +30,7 @@ export async function migrateLessonsToSections() {
                         title: 'Lessons',
                         description: 'All course lessons',
                         order: 0,
-                        content: course.lessons.map((lesson, index) => ({
+                        content: course.lessons.map((lesson: any, index: number) => ({
                             type: 'video',
                             title: lesson.title,
                             description: lesson.description,
