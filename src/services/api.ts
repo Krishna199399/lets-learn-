@@ -173,4 +173,16 @@ export const paymentAPI = {
         api.post('/payment/free-enroll', { courseId }),
 };
 
+// Settings APIs
+export const settingsAPI = {
+    get: () => api.get('/settings'),
+    update: (data: { emailNotifications?: boolean; maintenanceMode?: boolean; userRegistration?: boolean }) =>
+        api.put('/settings', data),
+};
+
+// Stats APIs (Public)
+export const statsAPI = {
+    getPublicStats: () => api.get('/stats/public'),
+};
+
 export default api;

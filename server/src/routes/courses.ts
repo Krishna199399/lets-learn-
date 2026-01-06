@@ -20,10 +20,26 @@ router.get('/', async (req: Request, res: Response, next) => {
 
         const courses = await Course.find(filter);
 
+        // Calculate real enrollment counts for each course
+        const coursesWithEnrollments = await Promise.all(
+            courses.map(async (course) => {
+                // Count users who have this course in their enrolledCourses array
+                const enrollmentCount = await User.countDocuments({
+                    enrolledCourses: course._id
+                });
+
+                // Return course with updated studentsEnrolled count
+                return {
+                    ...course.toObject(),
+                    studentsEnrolled: enrollmentCount
+                };
+            })
+        );
+
         res.status(200).json({
             success: true,
-            count: courses.length,
-            data: courses,
+            count: coursesWithEnrollments.length,
+            data: coursesWithEnrollments,
         });
     } catch (error) {
         next(error);

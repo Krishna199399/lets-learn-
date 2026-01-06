@@ -16,6 +16,18 @@ const router = Router();
 // @access  Public
 router.post('/signup', authLimiter, async (req: Request, res: Response, next) => {
     try {
+        // Check if registration is allowed
+        const { PlatformSettings } = await import('../models/PlatformSettings');
+        const settings = await PlatformSettings.findOne();
+        
+        console.log('Registration attempt - Settings:', settings);
+        console.log('User registration allowed:', settings?.userRegistration);
+        
+        if (settings && !settings.userRegistration) {
+            console.log('Registration blocked - userRegistration is disabled');
+            throw new AppError('User registration is currently disabled. Please contact support.', 403);
+        }
+
         const { name, email, password, role } = req.body;
 
         // Check if user already exists
@@ -80,6 +92,11 @@ router.post('/login', authLimiter, async (req: Request, res: Response, next) => 
         const user = await User.findOne({ email }).select('+password');
         if (!user) {
             throw new AppError('Invalid credentials', 401);
+        }
+
+        // Check if user is blocked
+        if (user.isBlocked) {
+            throw new AppError('Your account has been blocked. Please contact support.', 403);
         }
 
         // Validate password

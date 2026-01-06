@@ -29,7 +29,16 @@ router.get('/users', async (req: AuthRequest, res: Response, next) => {
                 { email: { $regex: search, $options: 'i' } },
             ];
         }
-        if (role) query.role = role;
+        
+        // Support multiple roles separated by comma (e.g., "teacher,admin")
+        if (role) {
+            const roles = (role as string).split(',').map(r => r.trim());
+            if (roles.length > 1) {
+                query.role = { $in: roles };
+            } else {
+                query.role = role;
+            }
+        }
 
         const users = await User.find(query)
             .select('-password')

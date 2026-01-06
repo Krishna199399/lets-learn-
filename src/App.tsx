@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
@@ -7,6 +7,7 @@ import StudentFooter from './components/layout/StudentFooter';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import ErrorBoundary from './components/ui/ErrorBoundary';
+import Maintenance from './pages/Maintenance';
 import Home from './pages/Home';
 import SignUp from './pages/auth/SignUp';
 import Login from './pages/auth/Login';
@@ -91,7 +92,9 @@ const StudentLayout = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const { setTheme } = useThemeStore();
-  const { checkAuth } = useAuthStore();
+  const { checkAuth, user } = useAuthStore();
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [checkingMaintenance, setCheckingMaintenance] = useState(true);
 
   useEffect(() => {
     // Initialize theme from localStorage
@@ -102,9 +105,45 @@ function App() {
 
     // Check authentication on app load
     checkAuth();
+
+    // Check maintenance mode
+    checkMaintenanceMode();
   }, [setTheme, checkAuth]);
 
+  const checkMaintenanceMode = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/settings`);
+      const data = await response.json();
+      
+      // Only show maintenance page if not admin
+      if (data.success && data.data.maintenanceMode && user?.role !== 'admin') {
+        setMaintenanceMode(true);
+      } else {
+        setMaintenanceMode(false);
+      }
+    } catch (error) {
+      console.error('Error checking maintenance mode:', error);
+      setMaintenanceMode(false);
+    } finally {
+      setCheckingMaintenance(false);
+    }
+  };
+
   const { toasts } = useToastStore();
+
+  // Show loading while checking maintenance
+  if (checkingMaintenance) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  // Show maintenance page if enabled (except for admins)
+  if (maintenanceMode && user?.role !== 'admin') {
+    return <Maintenance />;
+  }
 
   return (
     <ErrorBoundary>

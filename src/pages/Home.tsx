@@ -16,7 +16,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import SubjectCarousel from '../components/SubjectCarousel';
 import { staggerContainer, staggerItem } from '../utils/animations';
-import { courseAPI } from '../services/api';
+import { courseAPI, statsAPI } from '../services/api';
 import contactSupport from '../assets/contact-support.png';
 import classroomSvg from '../assets/Classroom.svg';
 import teachingSvg from '../assets/Teaching.svg';
@@ -35,13 +35,25 @@ interface Course {
     category: string;
 }
 
+interface Stats {
+    totalStudents: number;
+    totalCourses: number;
+    successRate: number;
+}
+
 const Home: React.FC = () => {
     const navigate = useNavigate();
     const [courses, setCourses] = useState<Course[]>([]);
+    const [stats, setStats] = useState<Stats>({
+        totalStudents: 0,
+        totalCourses: 0,
+        successRate: 100,
+    });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchCourses();
+        fetchStats();
     }, []);
 
     const fetchCourses = async () => {
@@ -52,6 +64,17 @@ const Home: React.FC = () => {
             console.error('Error fetching courses:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchStats = async () => {
+        try {
+            const response: any = await statsAPI.getPublicStats();
+            if (response.success && response.data) {
+                setStats(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching stats:', error);
         }
     };
 
@@ -191,7 +214,9 @@ const Home: React.FC = () => {
                             >
                                 <div className="text-left">
                                     <div className="text-3xl md:text-4xl font-bold text-white">
-                                        10K+
+                                        {stats.totalStudents >= 1000 
+                                            ? `${Math.floor(stats.totalStudents / 1000)}K+` 
+                                            : `${stats.totalStudents}+`}
                                     </div>
                                     <div className="text-sm text-white/80 mt-1">
                                         Students
@@ -199,7 +224,7 @@ const Home: React.FC = () => {
                                 </div>
                                 <div className="text-left">
                                     <div className="text-3xl md:text-4xl font-bold text-white">
-                                        50+
+                                        {stats.totalCourses}+
                                     </div>
                                     <div className="text-sm text-white/80 mt-1">
                                         Courses
@@ -207,7 +232,7 @@ const Home: React.FC = () => {
                                 </div>
                                 <div className="text-left">
                                     <div className="text-3xl md:text-4xl font-bold text-white">
-                                        100%
+                                        {stats.successRate}%
                                     </div>
                                     <div className="text-sm text-white/80 mt-1">
                                         Success

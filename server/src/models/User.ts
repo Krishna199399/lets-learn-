@@ -16,6 +16,7 @@ export interface IUser extends Document {
     institution?: string;
     subjectInterests?: string[];
     enrolledCourses: mongoose.Types.ObjectId[];
+    isBlocked?: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -82,6 +83,10 @@ const UserSchema = new Schema<IUser>(
                 ref: 'Course',
             },
         ],
+        isBlocked: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,

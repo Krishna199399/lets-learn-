@@ -43,7 +43,8 @@ import ProductManagement from './ProductManagement';
 import NotificationManagement from './NotificationManagement';
 import DoubtManagement from './DoubtManagement';
 import AdminHeader from '../../components/admin/AdminHeader';
-import { adminAPI } from '../../services/api';
+import { adminAPI, settingsAPI } from '../../services/api';
+import api from '../../services/api';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useThemeStore } from '../../store/useThemeStore';
 import { useToastStore } from '../../store/useToastStore';
@@ -89,14 +90,31 @@ const AdminDashboard: React.FC = () => {
     const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showMobileSidebar, setShowMobileSidebar] = useState(false);
-    const { logout } = useAuthStore();
+    const { logout, user, updateUser } = useAuthStore();
     const { isDark, toggleTheme } = useThemeStore();
     const { addToast } = useToastStore();
     const navigate = useNavigate();
 
+    // Settings state
+    const [profileName, setProfileName] = useState(user?.name || '');
+    const [profileEmail, setProfileEmail] = useState(user?.email || '');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [savingProfile, setSavingProfile] = useState(false);
+    const [changingPassword, setChangingPassword] = useState(false);
+    
+    // Platform settings state
+    const [emailNotifications, setEmailNotifications] = useState(true);
+    const [maintenanceMode, setMaintenanceMode] = useState(false);
+    const [userRegistration, setUserRegistration] = useState(true);
+    const [loadingSettings, setLoadingSettings] = useState(false);
+
     useEffect(() => {
         if (selectedTab === 'overview') {
             fetchDashboardData();
+        } else if (selectedTab === 'settings') {
+            fetchPlatformSettings();
         }
     }, [selectedTab]);
 
@@ -120,6 +138,39 @@ const AdminDashboard: React.FC = () => {
         }
     };
 
+    const fetchPlatformSettings = async () => {
+        try {
+            const response: any = await settingsAPI.get();
+            const settings = response.data;
+            console.log('Loaded platform settings:', settings);
+            setEmailNotifications(settings.emailNotifications);
+            setMaintenanceMode(settings.maintenanceMode);
+            setUserRegistration(settings.userRegistration);
+        } catch (error) {
+            console.error('Error fetching platform settings:', error);
+            addToast({ type: 'error', message: 'Failed to load platform settings' });
+        }
+    };
+
+    const updatePlatformSetting = async (setting: string, value: boolean) => {
+        try {
+            setLoadingSettings(true);
+            console.log(`Updating ${setting} to ${value}`);
+            await settingsAPI.update({ [setting]: value });
+            console.log(`Successfully updated ${setting}`);
+            addToast({ type: 'success', message: 'Setting updated successfully!' });
+        } catch (error: any) {
+            console.error('Error updating setting:', error);
+            addToast({ type: 'error', message: error.message || 'Failed to update setting' });
+            // Revert the change
+            if (setting === 'emailNotifications') setEmailNotifications(!value);
+            if (setting === 'maintenanceMode') setMaintenanceMode(!value);
+            if (setting === 'userRegistration') setUserRegistration(!value);
+        } finally {
+            setLoadingSettings(false);
+        }
+    };
+
     const handleLogout = () => {
         setShowLogoutModal(true);
     };
@@ -129,6 +180,64 @@ const AdminDashboard: React.FC = () => {
         addToast({ type: 'success', message: 'Logged out successfully!' });
         navigate('/login');
         setShowLogoutModal(false);
+    };
+
+    const handleSaveProfile = async () => {
+        if (!profileName || !profileEmail) {
+            addToast({ type: 'error', message: 'Please fill in all fields' });
+            return;
+        }
+
+        try {
+            setSavingProfile(true);
+            const response: any = await api.put('/auth/profile', {
+                name: profileName,
+                email: profileEmail,
+            });
+
+            updateUser(response.user);
+            addToast({ type: 'success', message: 'Profile updated successfully!' });
+        } catch (error: any) {
+            console.error('Error updating profile:', error);
+            addToast({ type: 'error', message: error.message || 'Failed to update profile' });
+        } finally {
+            setSavingProfile(false);
+        }
+    };
+
+    const handleChangePassword = async () => {
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            addToast({ type: 'error', message: 'Please fill in all password fields' });
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            addToast({ type: 'error', message: 'New passwords do not match' });
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            addToast({ type: 'error', message: 'Password must be at least 6 characters' });
+            return;
+        }
+
+        try {
+            setChangingPassword(true);
+            await api.put('/auth/change-password', {
+                currentPassword,
+                newPassword,
+            });
+
+            addToast({ type: 'success', message: 'Password changed successfully!' });
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (error: any) {
+            console.error('Error changing password:', error);
+            addToast({ type: 'error', message: error.message || 'Failed to change password' });
+        } finally {
+            setChangingPassword(false);
+        }
     };
 
     const stats: StatItem[] = [
@@ -419,6 +528,8 @@ const AdminDashboard: React.FC = () => {
                                                 </label>
                                                 <input
                                                     type="text"
+                                                    value={profileName}
+                                                    onChange={(e) => setProfileName(e.target.value)}
                                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                     placeholder="Your name"
                                                 />
@@ -429,11 +540,19 @@ const AdminDashboard: React.FC = () => {
                                                 </label>
                                                 <input
                                                     type="email"
+                                                    value={profileEmail}
+                                                    onChange={(e) => setProfileEmail(e.target.value)}
                                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                     placeholder="admin@example.com"
                                                 />
                                             </div>
-                                            <Button variant="primary">Save Changes</Button>
+                                            <Button 
+                                                variant="primary" 
+                                                onClick={handleSaveProfile}
+                                                disabled={savingProfile}
+                                            >
+                                                {savingProfile ? 'Saving...' : 'Save Changes'}
+                                            </Button>
                                         </div>
                                     </Card>
 
@@ -479,7 +598,16 @@ const AdminDashboard: React.FC = () => {
                                                     </p>
                                                 </div>
                                                 <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input type="checkbox" className="sr-only peer" defaultChecked />
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="sr-only peer" 
+                                                        checked={emailNotifications}
+                                                        onChange={(e) => {
+                                                            setEmailNotifications(e.target.checked);
+                                                            updatePlatformSetting('emailNotifications', e.target.checked);
+                                                        }}
+                                                        disabled={loadingSettings}
+                                                    />
                                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
                                                 </label>
                                             </div>
@@ -493,7 +621,16 @@ const AdminDashboard: React.FC = () => {
                                                     </p>
                                                 </div>
                                                 <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input type="checkbox" className="sr-only peer" />
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="sr-only peer" 
+                                                        checked={maintenanceMode}
+                                                        onChange={(e) => {
+                                                            setMaintenanceMode(e.target.checked);
+                                                            updatePlatformSetting('maintenanceMode', e.target.checked);
+                                                        }}
+                                                        disabled={loadingSettings}
+                                                    />
                                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
                                                 </label>
                                             </div>
@@ -507,7 +644,16 @@ const AdminDashboard: React.FC = () => {
                                                     </p>
                                                 </div>
                                                 <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input type="checkbox" className="sr-only peer" defaultChecked />
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="sr-only peer" 
+                                                        checked={userRegistration}
+                                                        onChange={(e) => {
+                                                            setUserRegistration(e.target.checked);
+                                                            updatePlatformSetting('userRegistration', e.target.checked);
+                                                        }}
+                                                        disabled={loadingSettings}
+                                                    />
                                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
                                                 </label>
                                             </div>
@@ -526,21 +672,33 @@ const AdminDashboard: React.FC = () => {
                                                 </label>
                                                 <input
                                                     type="password"
+                                                    value={currentPassword}
+                                                    onChange={(e) => setCurrentPassword(e.target.value)}
                                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 mb-3"
                                                     placeholder="Current password"
                                                 />
                                                 <input
                                                     type="password"
+                                                    value={newPassword}
+                                                    onChange={(e) => setNewPassword(e.target.value)}
                                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 mb-3"
                                                     placeholder="New password"
                                                 />
                                                 <input
                                                     type="password"
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
                                                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                                     placeholder="Confirm new password"
                                                 />
                                             </div>
-                                            <Button variant="primary">Update Password</Button>
+                                            <Button 
+                                                variant="primary"
+                                                onClick={handleChangePassword}
+                                                disabled={changingPassword}
+                                            >
+                                                {changingPassword ? 'Updating...' : 'Update Password'}
+                                            </Button>
                                         </div>
                                     </Card>
                                 </div>

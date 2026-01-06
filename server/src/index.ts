@@ -11,6 +11,7 @@ import { errorHandler } from './middleware/error';
 import { helmetSecurity, httpsRedirect, getSessionConfig, getCookieParserOptions } from './middleware/security';
 import { apiLimiter, paymentLimiter, adminLimiter } from './middleware/rateLimiter';
 import { generateSelfSignedCertificate, readSSLCertificates } from './utils/ssl-cert-generator';
+import { checkMaintenanceMode } from './middleware/maintenance';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -26,6 +27,8 @@ import invoiceRoutes from './routes/invoice';
 import enrollmentRoutes from './routes/enrollment';
 import doubtRoutes from './routes/doubts';
 import quizRoutes from './routes/quizzes';
+import settingsRoutes from './routes/settings';
+import statsRoutes from './routes/stats';
 
 // Load environment variables
 dotenv.config();
@@ -72,6 +75,9 @@ app.use('/videos', express.static(path.join(__dirname, '../public/videos')));
 // Apply general rate limiting to all API routes
 app.use('/api/', apiLimiter);
 
+// Apply maintenance mode check to all routes (except auth and settings)
+app.use(checkMaintenanceMode);
+
 // Routes (auth routes have their own rate limiters)
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
@@ -86,6 +92,8 @@ app.use('/api/invoice', invoiceRoutes);
 app.use('/api/enrollment', enrollmentRoutes);
 app.use('/api/doubts', doubtRoutes);
 app.use('/api/quizzes', quizRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/stats', statsRoutes);
 
 
 // Health check

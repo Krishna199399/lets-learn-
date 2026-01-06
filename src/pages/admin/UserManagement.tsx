@@ -27,7 +27,14 @@ const UserManagement: React.FC = () => {
             setLoading(true);
             const params: any = {};
             if (searchTerm) params.search = searchTerm;
-            if (selectedRole !== 'all') params.role = selectedRole;
+            
+            // Exclude students by default, unless specifically filtered
+            if (selectedRole === 'all') {
+                // Fetch only teachers and admins (exclude students)
+                params.role = 'teacher,admin';
+            } else {
+                params.role = selectedRole;
+            }
 
             const response = await adminAPI.users.getAll(params);
             setUsers(response.data || []);
@@ -101,7 +108,7 @@ const UserManagement: React.FC = () => {
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h2>
                     <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        Manage user accounts and permissions
+                        Manage teachers and admin accounts
                     </p>
                 </div>
             </div>
@@ -126,10 +133,9 @@ const UserManagement: React.FC = () => {
                             value={selectedRole}
                             onChange={(e) => setSelectedRole(e.target.value)}
                             className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                            <option value="all">All Roles</option>
-                            <option value="student">Student</option>
-                            <option value="teacher">Teacher</option>
-                            <option value="admin">Admin</option>
+                            <option value="all">All Staff</option>
+                            <option value="teacher">Teachers</option>
+                            <option value="admin">Admins</option>
                         </select>
                     </div>
                 </div>
