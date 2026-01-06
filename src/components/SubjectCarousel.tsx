@@ -40,50 +40,46 @@ const SubjectCarousel: React.FC = () => {
         <div className="w-full">
             {/* Mobile Carousel View (< md) */}
             <div className="block md:hidden">
-                <div className="relative overflow-hidden px-4">
+                <div className="relative overflow-hidden">
                     <motion.div
-                        className="flex gap-4"
+                        className="flex"
                         drag="x"
                         dragConstraints={{ left: 0, right: 0 }}
                         dragElastic={0.1}
                         onDragEnd={handleDragEnd}
                         animate={{ x: `-${currentIndex * 100}%` }}
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                        style={{ width: `${subjects.length * 100}%` }}
                     >
                         {subjects.map((subject, index) => {
                             const IconComponent = subject.icon;
                             return (
                                 <motion.div
                                     key={index}
-                                    className="flex-shrink-0"
-                                    style={{ width: `${100 / subjects.length}%` }}
+                                    className="w-full flex-shrink-0 px-4"
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: index * 0.1 }}
                                 >
-                                    <div className="mx-2">
-                                        <motion.button
-                                            onClick={() => navigate(`/courses?search=${subject.name}`)}
-                                            className={`w-full ${subject.color} rounded-3xl p-8 shadow-lg border-2 border-white/50 dark:border-gray-700/50 backdrop-blur-sm transition-all duration-300`}
-                                            whileTap={{ scale: 0.95 }}
-                                        >
-                                            {/* Icon Circle */}
-                                            <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br ${subject.gradient} flex items-center justify-center shadow-md`}>
-                                                <IconComponent size={36} className="text-white" />
-                                            </div>
+                                    <motion.button
+                                        onClick={() => navigate(`/courses?search=${subject.name}`)}
+                                        className={`w-full ${subject.color} rounded-3xl p-8 shadow-lg border-2 border-white/50 dark:border-gray-700/50 backdrop-blur-sm transition-all duration-300`}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        {/* Icon Circle */}
+                                        <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br ${subject.gradient} flex items-center justify-center shadow-md`}>
+                                            <IconComponent size={36} className="text-white" />
+                                        </div>
 
-                                            {/* Subject Name */}
-                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 text-center">
-                                                {subject.name}
-                                            </h3>
+                                        {/* Subject Name */}
+                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 text-center">
+                                            {subject.name}
+                                        </h3>
 
-                                            {/* Explore Button */}
-                                            <div className={`mt-4 px-6 py-2 bg-gradient-to-r ${subject.gradient} rounded-full text-white text-sm font-semibold shadow-md`}>
-                                                Explore
-                                            </div>
-                                        </motion.button>
-                                    </div>
+                                        {/* Explore Button */}
+                                        <div className={`mt-4 px-6 py-2 bg-gradient-to-r ${subject.gradient} rounded-full text-white text-sm font-semibold shadow-md mx-auto inline-block`}>
+                                            Explore
+                                        </div>
+                                    </motion.button>
                                 </motion.div>
                             );
                         })}
