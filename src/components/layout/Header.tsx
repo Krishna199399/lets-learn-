@@ -38,17 +38,17 @@ const Header: React.FC = () => {
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center space-x-3">
+                    <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
                         <img
                             src="/logo.png"
                             alt="Let's L-Earn and Lead"
-                            className="h-10 w-auto"
+                            className="h-8 sm:h-10 w-auto flex-shrink-0"
                         />
-                        <div className="flex flex-col">
-                            <span className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white leading-tight whitespace-nowrap">
                                 Lets <span className="text-yellow-600">L-Earn</span> and Lead
                             </span>
-                            <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-500 tracking-widest leading-tight">
+                            <span className="text-[10px] sm:text-xs font-semibold text-yellow-600 dark:text-yellow-500 tracking-wider sm:tracking-widest leading-tight whitespace-nowrap">
                                 LEARN EARN LEAD
                             </span>
                         </div>
@@ -149,10 +149,10 @@ const Header: React.FC = () => {
                             <div className="relative">
                                 <button
                                     onClick={() => setShowUserMenu(!showUserMenu)}
-                                    className="flex items-center space-x-2 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                 >
                                     <User className="w-4 h-4" />
-                                    <span className="text-sm font-medium">{user?.name}</span>
+                                    <span className="hidden sm:inline text-sm font-medium">{user?.name}</span>
                                     <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                                 </button>
 
@@ -187,7 +187,7 @@ const Header: React.FC = () => {
                                 </AnimatePresence>
                             </div>
                         ) : (
-                            <div className="flex items-center space-x-2">
+                            <div className="hidden sm:flex items-center space-x-2">
                                 <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
                                     Login
                                 </Button>
