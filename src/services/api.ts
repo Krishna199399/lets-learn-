@@ -86,8 +86,28 @@ export const noteAPI = {
     getAll: (params?: { courseId?: string; fileType?: string; category?: string; search?: string }) =>
         api.get('/notes', { params }),
     getById: (id: string) => api.get(`/notes/${id}`),
-    create: (data: any) => api.post('/notes', data),
-    update: (id: string, data: any) => api.put(`/notes/${id}`, data),
+    create: (data: any) => {
+        // Check if data is FormData (file upload)
+        if (data instanceof FormData) {
+            return api.post('/notes', data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+        }
+        return api.post('/notes', data);
+    },
+    update: (id: string, data: any) => {
+        // Check if data is FormData (file upload)
+        if (data instanceof FormData) {
+            return api.put(`/notes/${id}`, data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+        }
+        return api.put(`/notes/${id}`, data);
+    },
     delete: (id: string) => api.delete(`/notes/${id}`),
     getByCourse: (courseId: string) => api.get(`/notes/course/${courseId}`),
 };

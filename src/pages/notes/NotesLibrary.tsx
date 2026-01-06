@@ -455,17 +455,153 @@ const NotesLibrary: React.FC = () => {
                             <div className="p-6">
                                 <MarkdownViewer content={selectedNote.markdownContent} />
                             </div>
+                        ) : selectedNote?.fileUrl ? (
+                            <div className="flex flex-col h-full">
+                                {/* File Viewer */}
+                                <div className="flex-1 bg-gray-100 dark:bg-gray-900 overflow-auto">
+                                    {(() => {
+                                        const fileExtension = selectedNote.fileUrl.split('.').pop()?.toLowerCase();
+                                        const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+                                        const fileUrl = `${baseUrl}${selectedNote.fileUrl}`;
+                                        
+                                        // PDF Viewer - Use object tag for better compatibility
+                                        if (fileExtension === 'pdf') {
+                                            return (
+                                                <div className="w-full h-[70vh] bg-gray-200 dark:bg-gray-800">
+                                                    <object
+                                                        data={fileUrl}
+                                                        type="application/pdf"
+                                                        className="w-full h-full"
+                                                    >
+                                                        <div className="flex items-center justify-center h-full">
+                                                            <div className="text-center p-8">
+                                                                <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                                                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                                                    Your browser doesn't support PDF viewing.
+                                                                </p>
+                                                                <a
+                                                                    href={fileUrl}
+                                                                    download
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                >
+                                                                    <Button variant="primary" leftIcon={<Download className="w-5 h-5" />}>
+                                                                        Download PDF
+                                                                    </Button>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    </object>
+                                                </div>
+                                            );
+                                        }
+                                        
+                                        // Image Viewer
+                                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension || '')) {
+                                            return (
+                                                <div className="flex items-center justify-center p-8 min-h-[60vh]">
+                                                    <img
+                                                        src={fileUrl}
+                                                        alt={selectedNote.title}
+                                                        className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-2xl"
+                                                    />
+                                                </div>
+                                            );
+                                        }
+                                        
+                                        // Text File Viewer
+                                        if (['txt', 'text'].includes(fileExtension || '')) {
+                                            return (
+                                                <div className="p-8">
+                                                    <iframe
+                                                        src={fileUrl}
+                                                        className="w-full h-[60vh] border-2 border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                                                        title={selectedNote.title}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+                                        
+                                        // Document files (DOC, DOCX) - Show download option
+                                        return (
+                                            <div className="flex items-center justify-center h-[60vh]">
+                                                <div className="text-center">
+                                                    <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                        <FileText className="w-12 h-12 text-blue-600 dark:text-blue-400" />
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                                        Document File
+                                                    </h3>
+                                                    <p className="text-gray-600 dark:text-gray-400 mb-2">
+                                                        {selectedNote.title}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+                                                        This file type cannot be previewed in the browser
+                                                    </p>
+                                                    <a
+                                                        href={fileUrl}
+                                                        download
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <Button 
+                                                            variant="primary" 
+                                                            leftIcon={<Download className="w-5 h-5" />}
+                                                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                                                        >
+                                                            Download File
+                                                        </Button>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </div>
+                                
+                                {/* Download Button Footer */}
+                                {(() => {
+                                    const fileExtension = selectedNote.fileUrl.split('.').pop()?.toLowerCase();
+                                    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+                                    const fileUrl = `${baseUrl}${selectedNote.fileUrl}`;
+                                    
+                                    // Show download button for viewable files
+                                    if (['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'txt', 'text'].includes(fileExtension || '')) {
+                                        return (
+                                            <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                        <span className="font-medium">File Type:</span> {fileExtension?.toUpperCase()}
+                                                    </div>
+                                                    <a
+                                                        href={fileUrl}
+                                                        download
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm"
+                                                            leftIcon={<Download className="w-4 h-4" />}
+                                                            className="border-2"
+                                                        >
+                                                            Download
+                                                        </Button>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+                            </div>
                         ) : (
-                            <div className="flex items-center justify-center h-full">
+                            <div className="flex items-center justify-center h-[60vh]">
                                 <div className="text-center">
                                     <FileText className="w-24 h-24 text-gray-400 mx-auto mb-4" />
-                                    <h3 className="text-xl font-bold mb-2">PDF/Document Viewer</h3>
-                                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                        {selectedNote?.title}
+                                    <h3 className="text-xl font-bold mb-2">No Content Available</h3>
+                                    <p className="text-gray-600 dark:text-gray-400">
+                                        This note doesn't have any content to display
                                     </p>
-                                    <Button variant="primary" leftIcon={<Download className="w-5 h-5" />}>
-                                        Download File
-                                    </Button>
                                 </div>
                             </div>
                         )}

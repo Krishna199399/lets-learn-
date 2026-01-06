@@ -23,6 +23,8 @@ export const helmetSecurity = helmet({
             imgSrc: ["'self'", "data:", "https:", "http:"],
             connectSrc: ["'self'", "https://api.razorpay.com"],
             frameSrc: ["'self'", "https://api.razorpay.com"],
+            // Allow embedding in iframes from same origin (for PDF/file viewing)
+            frameAncestors: ["'self'"],
         },
     },
 
