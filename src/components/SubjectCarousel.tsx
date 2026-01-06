@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Calculator, Beaker, Dna, Atom, Languages, BookA, Cpu } from 'lucide-react';
+import { Calculator, Beaker, Dna, Atom, Languages, BookA, Cpu, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Subject {
     name: string;
@@ -24,15 +24,48 @@ const subjects: Subject[] = [
 const SubjectCarousel: React.FC = () => {
     const navigate = useNavigate();
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
 
-    const handleDragEnd = (_: any, info: any) => {
-        const threshold = 50;
-        const dragDistance = info.offset.x;
+    const minSwipeDistance = 50;
 
-        if (dragDistance > threshold && currentIndex > 0) {
-            setCurrentIndex(currentIndex - 1);
-        } else if (dragDistance < -threshold && currentIndex < subjects.length - 1) {
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(0);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe && currentIndex < subjects.length - 1) {
             setCurrentIndex(currentIndex + 1);
+        }
+        if (isRightSwipe && currentIndex > 0) {
+            setCurrentIndex(currentIndex - 1);
+        }
+    };
+
+    const goToSlide = (index: number) => {
+        setCurrentIndex(index);
+    };
+
+    const goToNext = () => {
+        if (currentIndex < subjects.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+        }
+    };
+
+    const goToPrev = () => {
+        if (currentIndex > 0) {
+            setCurrentIndex(currentIndex - 1);
         }
     };
 
@@ -40,50 +73,73 @@ const SubjectCarousel: React.FC = () => {
         <div className="w-full">
             {/* Mobile Carousel View (< md) */}
             <div className="block md:hidden">
-                <div className="relative overflow-hidden">
-                    <motion.div
-                        className="flex"
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={0.1}
-                        onDragEnd={handleDragEnd}
-                        animate={{ x: `-${currentIndex * 100}%` }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                <div className="relative px-4">
+                    {/* Carousel Container */}
+                    <div 
+                        className="overflow-hidden"
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
                     >
-                        {subjects.map((subject, index) => {
-                            const IconComponent = subject.icon;
-                            return (
-                                <motion.div
-                                    key={index}
-                                    className="w-full flex-shrink-0 px-4"
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: index * 0.1 }}
-                                >
-                                    <motion.button
-                                        onClick={() => navigate(`/courses?search=${subject.name}`)}
-                                        className={`w-full ${subject.color} rounded-3xl p-8 shadow-lg border-2 border-white/50 dark:border-gray-700/50 backdrop-blur-sm transition-all duration-300`}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        {/* Icon Circle */}
-                                        <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br ${subject.gradient} flex items-center justify-center shadow-md`}>
-                                            <IconComponent size={36} className="text-white" />
-                                        </div>
+                        <AnimatePresence mode="wait" initial={false}>
+                            <motion.div
+                                key={currentIndex}
+                                initial={{ opacity: 0, x: 100 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -100 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                            >
+                                {(() => {
+                                    const subject = subjects[currentIndex];
+                                    const IconComponent = subject.icon;
+                                    return (
+                                        <button
+                                            onClick={() => navigate(`/courses?search=${subject.name}`)}
+                                            className={`w-full ${subject.color} rounded-3xl p-8 shadow-lg border-2 border-white/50 dark:border-gray-700/50 backdrop-blur-sm transition-all duration-300 active:scale-95`}
+                                        >
+                                            {/* Icon Circle */}
+                                            <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br ${subject.gradient} flex items-center justify-center shadow-md`}>
+                                                <IconComponent size={36} className="text-white" />
+                                            </div>
 
-                                        {/* Subject Name */}
-                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 text-center">
-                                            {subject.name}
-                                        </h3>
+                                            {/* Subject Name */}
+                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 text-center">
+                                                {subject.name}
+                                            </h3>
 
-                                        {/* Explore Button */}
-                                        <div className={`mt-4 px-6 py-2 bg-gradient-to-r ${subject.gradient} rounded-full text-white text-sm font-semibold shadow-md mx-auto inline-block`}>
-                                            Explore
-                                        </div>
-                                    </motion.button>
-                                </motion.div>
-                            );
-                        })}
-                    </motion.div>
+                                            {/* Explore Button */}
+                                            <div className={`mt-4 px-8 py-3 bg-gradient-to-r ${subject.gradient} rounded-full text-white text-sm font-semibold shadow-md mx-auto inline-block`}>
+                                                Explore
+                                            </div>
+                                        </button>
+                                    );
+                                })()}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Navigation Arrows */}
+                    <button
+                        onClick={goToPrev}
+                        disabled={currentIndex === 0}
+                        className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white dark:bg-gray-800 shadow-lg ${
+                            currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'
+                        }`}
+                        aria-label="Previous slide"
+                    >
+                        <ChevronLeft className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                    </button>
+
+                    <button
+                        onClick={goToNext}
+                        disabled={currentIndex === subjects.length - 1}
+                        className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white dark:bg-gray-800 shadow-lg ${
+                            currentIndex === subjects.length - 1 ? 'opacity-30 cursor-not-allowed' : 'opacity-80 hover:opacity-100'
+                        }`}
+                        aria-label="Next slide"
+                    >
+                        <ChevronRight className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                    </button>
                 </div>
 
                 {/* Scroll Indicators */}
@@ -91,14 +147,20 @@ const SubjectCarousel: React.FC = () => {
                     {subjects.map((_, index) => (
                         <button
                             key={index}
-                            onClick={() => setCurrentIndex(index)}
-                            className={`transition-all duration-300 rounded-full ${index === currentIndex
-                                ? 'w-8 h-2 bg-gradient-to-r from-purple-600 to-blue-600'
-                                : 'w-2 h-2 bg-gray-300 dark:bg-gray-600'
-                                }`}
+                            onClick={() => goToSlide(index)}
+                            className={`transition-all duration-300 rounded-full ${
+                                index === currentIndex
+                                    ? 'w-8 h-2 bg-gradient-to-r from-purple-600 to-blue-600'
+                                    : 'w-2 h-2 bg-gray-300 dark:bg-gray-600'
+                            }`}
                             aria-label={`Go to slide ${index + 1}`}
                         />
                     ))}
+                </div>
+
+                {/* Counter */}
+                <div className="text-center mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    {currentIndex + 1} / {subjects.length}
                 </div>
             </div>
 
