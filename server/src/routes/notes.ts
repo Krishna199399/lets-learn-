@@ -70,6 +70,25 @@ router.get('/', async (req: Request, res: Response, next) => {
     }
 });
 
+// @route   GET /api/notes/course/:courseId
+// @desc    Get all notes for a specific course
+// @access  Public
+router.get('/course/:courseId', async (req: Request, res: Response, next) => {
+    try {
+        const notes = await Note.find({ courseId: req.params.courseId })
+            .populate('uploadedBy', 'name')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: notes.length,
+            data: notes,
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
 // @route   GET /api/notes/:id
 // @desc    Get single note
 // @access  Public

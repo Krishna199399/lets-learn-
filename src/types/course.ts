@@ -1,7 +1,7 @@
 // Course Type Definitions
 export interface IContentItem {
     _id?: string;
-    type: 'video' | 'article' | 'assignment';
+    type: 'video' | 'article';
     title: string;
     description: string;
     videoUrl?: string;

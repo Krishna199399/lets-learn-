@@ -12,7 +12,8 @@ import {
     Brain,
     Video,
     Download,
-    CheckCircle
+    CheckCircle,
+    Eye
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -486,15 +487,28 @@ const MyCourses: React.FC = () => {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <a
-                                                href={material.fileUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                <Button variant="outline" size="sm">
-                                                    <Download className="w-4 h-4" />
+                                            <div className="flex items-center gap-2">
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        // Open note viewer (you can add a modal here)
+                                                        window.open(`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${material.fileUrl}`, '_blank');
+                                                    }}
+                                                >
+                                                    <Eye className="w-4 h-4" />
                                                 </Button>
-                                            </a>
+                                                <a
+                                                    href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${material.fileUrl}`}
+                                                    download
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    <Button variant="outline" size="sm">
+                                                        <Download className="w-4 h-4" />
+                                                    </Button>
+                                                </a>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

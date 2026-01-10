@@ -50,7 +50,7 @@ const Contact: React.FC = () => {
         {
             icon: MapPin,
             title: 'Visit Us',
-            content: '123 Learning Street,',
+            content: '#981/C Shankar nagar, Athani, Pincode 591304',
             description: 'Come say hello at our office',
         },
         {
@@ -249,7 +249,7 @@ const Contact: React.FC = () => {
                     </motion.div>
                 </div>
 
-                {/* Map or Additional Section */}
+                {/* Map Section */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -260,10 +260,29 @@ const Contact: React.FC = () => {
                         Find Us On The Map
                     </h2>
                     <div className="w-full h-96 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden">
-                        {/* Placeholder for map - you can integrate Google Maps or another map service */}
-                        <div className="w-full h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
-                            <MapPin className="w-16 h-16" />
-                        </div>
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3843.8!2d75.0567!3d16.7208!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc6f7b6c7f8e7bf%3A0x1f9a0c1d3f4b5e6d!2sShankar%20Nagar%2C%20Athani%2C%20Karnataka%20591304!5e0!3m2!1sen!2sin!4v1234567890"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            title="Office Location - #981/C Shankar nagar, Athani"
+                        ></iframe>
+                    </div>
+                    <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                            📍 #981/C Shankar nagar, Athani, Pincode 591304
+                        </p>
+                        <a
+                            href="https://www.google.com/maps/place/Shankar+Nagar,+Athani,+Karnataka+591304"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium inline-flex items-center gap-1"
+                        >
+                            Open in Google Maps →
+                        </a>
                     </div>
                 </motion.div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, ChevronDown, ChevronUp, Trash2, GripVertical, Video, FileText, HelpCircle, ClipboardList } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Trash2, GripVertical, Video, FileText } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import type { ISection, ISubsection, IContentItem } from '../../types/course';
 
@@ -127,8 +127,6 @@ const CourseContentBuilder: React.FC<CourseContentBuilderProps> = ({ sections, o
         switch (type) {
             case 'video': return <Video className="w-4 h-4" />;
             case 'article': return <FileText className="w-4 h-4" />;
-            case 'quiz': return <HelpCircle className="w-4 h-4" />;
-            case 'assignment': return <ClipboardList className="w-4 h-4" />;
             default: return <Video className="w-4 h-4" />;
         }
     };
@@ -302,8 +300,6 @@ const CourseContentBuilder: React.FC<CourseContentBuilderProps> = ({ sections, o
                                                                                     >
                                                                                         <option value="video">Video</option>
                                                                                         <option value="article">Article</option>
-                                                                                        <option value="quiz">Quiz</option>
-                                                                                        <option value="assignment">Assignment</option>
                                                                                     </select>
                                                                                     <input
                                                                                         type="text"
